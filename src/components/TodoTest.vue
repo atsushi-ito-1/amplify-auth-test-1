@@ -4,6 +4,7 @@
         <input type="text" v-model="name" placeholder="Todo name" />
         <input type="text" v-model="description" placeholder="Todo description" />
         <button @click="createTodo">Create Todo</button>
+        <p>{{ note }}</p>
         <div v-for="todo in todos" :key="todo.id">
             <h3>{{ todo.name }}</h3>
             <p>
@@ -15,7 +16,7 @@
 </template>
 
 <script>
-import { API } from 'aws-amplify'
+import { API, graphqlOperation } from 'aws-amplify'
 import { createTodo, deleteTodo } from '../graphql/mutations'
 import { listTodos } from '../graphql/queries'
 import { onCreateTodo } from '../graphql/subscriptions'
@@ -30,7 +31,8 @@ export default {
         return {
             name: '',
             description: '',
-            todos: []
+            todos: [],
+            note: {}
         }
     },
     methods: {
@@ -39,24 +41,26 @@ export default {
             if (!name || !description) return
             const todo = { name, description }
             this.todos = [...this.todos, todo]
-            await API.graphql({ query: createTodo, variables: { input: todo } });
+            API.graphql(graphqlOperation(createTodo, { input: todo }))
             this.name = ''
             this.description = ''
         },
         async deleteTodo(id) {
-            await API.graphql({ query: deleteTodo, variables: { input: { id } } })
+            await API.graphql(graphqlOperation(deleteTodo, { input: { id } }))
             this.getTodos()
         },
         async getTodos() {
-            const todos = await API.graphql({ query: listTodos })
+            const todos = await API.graphql(graphqlOperation(listTodos))
+            // this.note = todos
             this.todos = todos.data.listTodos.items
         },
         subscribe() {
-            API.graphql({ query: onCreateTodo })
+            API.graphql(graphqlOperation(onCreateTodo))
                 .subscribe({
                     next: (eventData) => {
+                        // this.note = eventData
                         let todo = eventData.value.data.onCreateTodo
-                        if (this.todos.some(item => item.name === todo.name)) return // remove duplications
+                        if (this.todos.some(item => item.name === todo.name)) return
                         this.todos = [...this.todos, todo]
                     }
                 })
