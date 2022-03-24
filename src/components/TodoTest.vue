@@ -1,3 +1,6 @@
+<script setup>
+</script>
+
 <template>
     <div class="todos">
         <h1>Todo App</h1>

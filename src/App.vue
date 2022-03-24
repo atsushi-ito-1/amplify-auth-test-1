@@ -1,22 +1,22 @@
 <script setup>
 import { Authenticator } from '@aws-amplify/ui-vue'
 import '@aws-amplify/ui-vue/styles.css'
+import TodoTest from "./components/TodoTest.vue"
 </script>
 
 <template>
-  <authenticator>
-    <template v-slot="{ user, signOut }">
-      <h1>Hello {{ user.username }}!</h1>
-      <button @click="signOut">Sign Out</button>
-      <div id="app">
+  <div id="app">
+    <authenticator>
+      <template v-slot="{ user, signOut }">
+        <h1>Hello {{ user.username }}!</h1>
+        <button @click="signOut">Sign Out</button>
         <TodoTest />
-      </div>
-    </template>
-  </authenticator>
+      </template>
+    </authenticator>
+  </div>
 </template>
 
 <script>
-import TodoTest from "./components/TodoTest.vue"
 export default {
   name: 'app',
   components: {
