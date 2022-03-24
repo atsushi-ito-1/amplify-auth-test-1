@@ -58,8 +58,11 @@ function subscribe() {
         <div v-for="todo in todos.value" :key="todo.id">
             <h3>{{ todo.name }}</h3>
             <p>
+                {{ todo.createdAt }}
                 {{ todo.description }}
-                <span @click="deleteTodo(todo.id)">[x]</span>
+                <span
+                    @click="deleteTodo(todo.id)"
+                >[x]</span>
             </p>
         </div>
     </div>
