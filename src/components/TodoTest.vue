@@ -1,4 +1,51 @@
 <script setup>
+import { ref, reactive } from 'vue'
+import { API, graphqlOperation } from 'aws-amplify'
+import * as Mutation from '../graphql/mutations'
+import * as Query from '../graphql/queries'
+import * as Subscription from '../graphql/subscriptions'
+const name = ref('')
+const description = ref('')
+const todos = reactive([])
+const note = reactive({}) // for debugging.
+getTodos()
+subscribe()
+
+async function getTodos() {
+    todos.value = (await API.graphql(graphqlOperation(Query.listTodos))).data.listTodos.items
+}
+
+async function createTodo() {
+    if (!name.value || !description.value) return;
+    const todo = { name: name.value, description: description.value }
+    name.value = ''
+    description.value = ''
+    await API.graphql(graphqlOperation(Mutation.createTodo, { input: todo }))
+    getTodos()
+}
+
+async function deleteTodo(id) {
+    await API.graphql(graphqlOperation(Mutation.deleteTodo, { input: { id } }))
+    getTodos()
+}
+
+function subscribe() {
+    API.graphql(graphqlOperation(Subscription.onCreateTodo))
+        .subscribe({
+            next: (eventData) => {
+                let todo = eventData.value.data.onCreateTodo
+                if (todos.value.some(item => item.name === todo.name)) return
+                getTodos()
+            }
+        })
+    API.graphql(graphqlOperation(Subscription.onDeleteTodo))
+        .subscribe({
+            next: () => {
+                getTodos()
+            }
+        })
+}
+
 </script>
 
 <template>
@@ -8,7 +55,7 @@
         <input type="text" v-model="description" placeholder="Todo description" />
         <button @click="createTodo">Create Todo</button>
         <p>{{ note }}</p>
-        <div v-for="todo in todos" :key="todo.id">
+        <div v-for="todo in todos.value" :key="todo.id">
             <h3>{{ todo.name }}</h3>
             <p>
                 {{ todo.description }}
@@ -17,57 +64,3 @@
         </div>
     </div>
 </template>
-
-<script>
-import { API, graphqlOperation } from 'aws-amplify'
-import { createTodo, deleteTodo } from '../graphql/mutations'
-import { listTodos } from '../graphql/queries'
-import { onCreateTodo } from '../graphql/subscriptions'
-
-export default {
-    name: 'TodoTest',
-    async created() {
-        this.getTodos()
-        this.subscribe()
-    },
-    data() {
-        return {
-            name: '',
-            description: '',
-            todos: [],
-            note: {}
-        }
-    },
-    methods: {
-        async createTodo() {
-            const { name, description } = this
-            if (!name || !description) return
-            const todo = { name, description }
-            this.todos = [...this.todos, todo]
-            API.graphql(graphqlOperation(createTodo, { input: todo }))
-            this.name = ''
-            this.description = ''
-        },
-        async deleteTodo(id) {
-            await API.graphql(graphqlOperation(deleteTodo, { input: { id } }))
-            this.getTodos()
-        },
-        async getTodos() {
-            const todos = await API.graphql(graphqlOperation(listTodos))
-            // this.note = todos
-            this.todos = todos.data.listTodos.items
-        },
-        subscribe() {
-            API.graphql(graphqlOperation(onCreateTodo))
-                .subscribe({
-                    next: (eventData) => {
-                        // this.note = eventData
-                        let todo = eventData.value.data.onCreateTodo
-                        if (this.todos.some(item => item.name === todo.name)) return
-                        this.todos = [...this.todos, todo]
-                    }
-                })
-        }
-    }
-}
-</script>
