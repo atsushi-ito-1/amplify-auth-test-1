@@ -6,6 +6,7 @@ import * as Query from '../graphql/queries'
 import * as Subscription from '../graphql/subscriptions'
 const name = ref('')
 const description = ref('')
+const priority = ref(3)
 const todos = reactive([])
 const note = reactive({}) // for debugging.
 getTodos()
@@ -17,7 +18,7 @@ async function getTodos() {
 
 async function createTodo() {
     if (!name.value || !description.value) return;
-    const todo = { name: name.value, description: description.value }
+    const todo = { name: name.value, description: description.value, priority: priority.value}
     name.value = ''
     description.value = ''
     await API.graphql(graphqlOperation(Mutation.createTodo, { input: todo }))
@@ -53,13 +54,15 @@ function subscribe() {
         <h1>Todo App</h1>
         <input type="text" v-model="name" placeholder="Todo name" />
         <input type="text" v-model="description" placeholder="Todo description" />
+        <input type="text" v-model="priority" placeholder="Todo priority" />
         <button @click="createTodo">Create Todo</button>
         <p>{{ note }}</p>
         <div v-for="todo in todos.value" :key="todo.id">
             <h3>{{ todo.name }}</h3>
             <p>
-                {{ todo.createdAt }}
+                {{ new Date(Date.parse(todo.createdAt)).toLocaleString() }}
                 {{ todo.description }}
+                優先度:{{ todo.priority }}
                 <span
                     @click="deleteTodo(todo.id)"
                 >[x]</span>
