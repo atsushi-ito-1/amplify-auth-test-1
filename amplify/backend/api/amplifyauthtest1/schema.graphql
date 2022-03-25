@@ -7,4 +7,6 @@ type Todo @model @searchable {
   name: String!
   description: String
   priority: Int
+  created: Int
+  updated: Int
 }

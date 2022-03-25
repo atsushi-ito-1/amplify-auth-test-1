@@ -23,6 +23,8 @@ export const searchTodos = /* GraphQL */ `
         name
         description
         priority
+        created
+        updated
         createdAt
         updatedAt
       }
@@ -52,6 +54,8 @@ export const getTodo = /* GraphQL */ `
       name
       description
       priority
+      created
+      updated
       createdAt
       updatedAt
     }
@@ -69,6 +73,8 @@ export const listTodos = /* GraphQL */ `
         name
         description
         priority
+        created
+        updated
         createdAt
         updatedAt
       }

@@ -11,6 +11,8 @@ export const createTodo = /* GraphQL */ `
       name
       description
       priority
+      created
+      updated
       createdAt
       updatedAt
     }
@@ -26,6 +28,8 @@ export const updateTodo = /* GraphQL */ `
       name
       description
       priority
+      created
+      updated
       createdAt
       updatedAt
     }
@@ -41,6 +45,8 @@ export const deleteTodo = /* GraphQL */ `
       name
       description
       priority
+      created
+      updated
       createdAt
       updatedAt
     }
